@@ -2,7 +2,12 @@
 
 
 
-code = "(+ (* 5 2) 6)"
+code = "(+ (* (^ (d) 1) 2) 6)"
+
+
+def atom(token):
+	pass
+	
 
 
 def parse(tokens):
@@ -18,12 +23,13 @@ def parse(tokens):
 			L.append(token)
 	else:
 		return token
-	
 
 
-
-tokens  = code.replace('(',' ( ').replace(')',' ) ').split()
-import pdb
-#pdb.set_trace()
-op  = parse(tokens)
-print op
+while True:
+	print "myList>",
+	code = raw_input()
+	if code:
+		tokens  = code.replace('(',' ( ').replace(')',' ) ').split()
+		op  = parse(tokens)
+		print code
+		print op
