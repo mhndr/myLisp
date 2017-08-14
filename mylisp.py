@@ -18,6 +18,9 @@ def parse(tokens):
 	if '(' == token:
 		while (True):
 			token = parse(tokens)
+			if token == None:
+				print "Error while parsing input"
+				return None
 			if token == ')':
 				return L
 			L.append(token)
@@ -30,6 +33,8 @@ while True:
 	code = raw_input()
 	if code:
 		tokens  = code.replace('(',' ( ').replace(')',' ) ').split()
+		import pdb
+#		pdb.set_trace()
 		op  = parse(tokens)
-		print code
-		print op
+		if op != None:
+			print op
