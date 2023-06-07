@@ -16,6 +16,8 @@ def atom(x):
     return '()'
 
 def quote(x):
+    if x=='()':
+        return ""
     return x
 
 def eq(x,y):
@@ -25,7 +27,7 @@ def eq(x,y):
 
 def car(x):
     if atom(x) != 't':
-        return x[0]
+        return list(x[0])
     return '()'
 
 def cdr(x):
@@ -34,9 +36,17 @@ def cdr(x):
     return '()'
 
 def cons(x):
-    if atom(x) != 't':
+    if atom(x)=='t' and len(x)==1:
         return list(x)
-    return '()'
+    
+    res = []
+    _s = str(x)
+    for c in _s.split():
+        if c != '[' and c != ']' and c !='`':
+            c = c.strip(",[]\"'")
+            res.append(c)
+        
+    return res
 
 def cond(plist):
     ret = '()'
@@ -95,8 +105,13 @@ def evaluate(expression):
         token = token.strip('(')
         token = token.rstrip(')')
         
-        if token in unary_operators:
-            operand = stack.pop()
+        if token in unary_operators or token[0]=='`':
+            if token[0]=='`':
+                operand = token[1:]
+                token=token[0]
+            else:
+                operand = stack.pop()
+            operand = operand.rstrip(')')
             if token == 'atom':
                 stack.append(atom(operand))
             elif token == 'quote' or token == '`':
@@ -163,8 +178,8 @@ def execute(program):
 
     res = evaluate(program)
     
-       
-    return res
+    print(res)
+    return
 
 
 """ OUTPUT
@@ -191,14 +206,25 @@ execute('(- 5 (+ 1 2))')
 2
 
 
-execute('(cons (x y) (a b))')
-['x', 'y', 'a', 'b']
-
+execute('(`a)')
+a
+execute('(cons `a)')
+['a']
 execute('(cons (car (x y)  cdr (a b)))')
 ['x']
-
 execute('(cons (cdr (x y)  cdr (a b)))')
-[['y', ['b']]] -> wrong output
+['y', 'b']
+execute('(cons (x y) (a b))')
+['x', 'y', 'a', 'b'] ==> Output to be like -> (x y a b) 
+____________________________________________
+wrong output - WIP
 
+
+execute('(cons `a (cons `b (cons `c `())))')
+['a', 'b', 'c', '('] ==> need to remove '('
+execute('(car (cons `a `(b,c)))')
+['a', '(b,c']
+execute('(cdr (cons `a `(b,c)))')
+[]  ==> wrong output , correct output -> (b c)
 
 """
