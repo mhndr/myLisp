@@ -1,4 +1,6 @@
 
+import re
+import pdb 
 
 """
 seven primitive operators:
@@ -96,26 +98,29 @@ def get_longest_valid_paren_str(s):
 
     return max(B)
 
+def split(delimiters, string, maxsplit=0):
+    import re
+    regex_pattern = '|'.join(map(re.escape, delimiters))
+    return re.split(regex_pattern, string, maxsplit)
+
 
 def evaluate(expression):
     stack = []
-    #import pdb
     #pdb.set_trace()
-    for token in reversed(expression.split()):
-        token = token.strip('(')
-        token = token.rstrip(')')
+    delimiters = '(',')',',',' ','`'
+    expression = split(delimiters,expression)
+    for token in reversed(expression):
+        if token == '' or token == ',':
+            continue
         
         if token in unary_operators or token[0]=='`':
-            if token[0]=='`':
-                operand = token[1:]
-                token=token[0]
-            else:
-                operand = stack.pop()
-            operand = operand.rstrip(')')
+            operands = []
+            while stack :
+                operands.append(stack.pop())
             if token == 'atom':
-                stack.append(atom(operand))
+                stack.append(atom(operands))
             elif token == 'quote' or token == '`':
-                stack.append(quote(operand))
+                stack.append(quote(operands))
 
         elif token in binary_operators:
             operand1 = stack.pop()
@@ -137,13 +142,17 @@ def evaluate(expression):
             while stack :
                 operands.append(stack.pop())
             if token == 'car':
-                stack.append(car(operands))
+                ret = car(operands)
+                stack.append(ret)
             elif token == 'cdr':
-                stack.append(cdr(operands))
+                ret = cdr(operands)
+                stack.append(ret)
             elif token == 'cons':
-                stack.append(cons(operands))
+                ret = cons(operands)
+                stack.append(ret)
             elif token == 'cond':
-                stack.append(cond(operands))
+                ret = cond(operands)
+                stack.append(ret)
 
                 
         elif token.isdigit():
@@ -162,8 +171,9 @@ def evaluate(expression):
             sub_result = evaluate(sub_expression)
             stack.append(sub_result)
             
-
-    return stack.pop()
+    ret =" ".join(stack.pop())
+    ret = "("+ret+")" 
+    return ret
 
 
 
@@ -171,10 +181,9 @@ def execute(program):
     if type(program)!=str:
         return None
 
-#    valid_str_len = get_longest_valid_paren_str(program)
-#    print(valid_str_len,len(program))
-#    if valid_str_len != len(program)-1:
-#        return "Syntax Error - Parenthesis Mismatch"
+    #valid_str_len = get_longest_valid_paren_str(program)
+    #if valid_str_len != len(program):
+    #    return "Syntax Error - Parenthesis Mismatch"
 
     res = evaluate(program)
     
@@ -198,13 +207,17 @@ execute('(cdr (x y))')
 ['y']
 
 execute('(- 8 (* (+ 1 2) (- 9 7)))')
-     
+     execute('(cdr (x y))')
 2
 
 execute('(- 5 (+ 1 2))')
      
 2
 
+execute('(car (cons `a `(b,c)))')
+['a', '(b,c']
+execute('(car (cons `a `(b,c))')
+'Syntax Error - Parenthesis Mismatch'
 
 execute('(`a)')
 a
